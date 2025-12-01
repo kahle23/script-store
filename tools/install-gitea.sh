@@ -20,7 +20,8 @@ sudo -u gitea mkdir /home/gitea/data;
 # 构建目录
 echo "下载二进制文件...";
 cd /home/gitea;
-wget https://github.com/go-gitea/gitea/releases/download/v1.22.6/gitea-1.22.6-linux-amd64;
+#wget https://github.com/go-gitea/gitea/releases/download/v1.22.6/gitea-1.22.6-linux-amd64;
+wget https://gh-proxy.com/https://github.com/go-gitea/gitea/releases/download/v1.22.6/gitea-1.22.6-linux-amd64;
 
 
 

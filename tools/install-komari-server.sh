@@ -152,15 +152,17 @@ install_binary() {
 
     local file_name="komari-linux-${arch}"
     local download_url="https://github.com/komari-monitor/komari/releases/latest/download/${file_name}"
+    # 镜像站加速
+	download_url = "https://gh-proxy.com/$download_url"
 
     log_step "下载 Komari 二进制文件..."
     log_info "URL: $download_url"
 
-    cp ./komari-linux-amd64 "$BINARY_PATH"
-    #if ! curl -L -o "$BINARY_PATH" "$download_url"; then
-    #    log_error "下载失败"
-    #    return 1
-    #fi
+    #cp ./komari-linux-amd64 "$BINARY_PATH"
+    if ! curl -L -o "$BINARY_PATH" "$download_url"; then
+        log_error "下载失败"
+        return 1
+    fi
 
     chmod +x "$BINARY_PATH"
     log_success "Komari 二进制文件安装完成: $BINARY_PATH"

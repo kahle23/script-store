@@ -1,11 +1,13 @@
 #!/bin/bash
-
+# ==================================================
 # Tinc VPN 自动安装配置脚本
-# 使用方法: ./install-tinc.sh <网络名>
+# [功能]：自动安装并配置 Tinc VPN
+# [用法]：./install-tinc.sh <网络名> <主机名> <网络地址>
+# ================================================== 
+
 
 # 遇到错误立即退出
 set -e
-
 
 # 参数检查
 if [ $# -ne 3 ]; then
@@ -16,7 +18,7 @@ if [ $# -ne 3 ]; then
 fi
 
 
-# 检查root权限
+# 检查 root 权限
 if [ "$EUID" -ne 0 ]; then
     echo "错误: 请使用root权限运行此脚本"
     exit 1
@@ -39,13 +41,13 @@ echo "IP地址: $NETWORK_ADDR"
 echo ""
 
 
-# 安装Tinc
+# 安装 Tinc （指定版本，防止后面安装时差异过大）
 echo "步骤1: 安装Tinc软件包..."
 if command -v yum &> /dev/null; then
-    yum install -y tinc
+    yum install -y tinc-1.0.36
 elif command -v apt-get &> /dev/null; then
     apt-get update
-    apt-get install -y tinc
+    apt-get install -y tinc-1.0.36
 else
     echo "错误: 不支持的包管理器(yum或apt-get)"
     exit 1
@@ -66,7 +68,7 @@ echo ""
 # 创建基础配置文件
 echo "步骤3: 创建基础配置文件..."
 
-# 创建tinc.conf
+# 创建 tinc.conf
 cat > "$TINC_DIR/tinc.conf" << EOF
 # Tinc VPN 配置
 Name = $HOST_NAME
@@ -80,7 +82,7 @@ ConnectTo = demo1
 #ConnectTo = demo2
 EOF
 
-# 创建tinc-up脚本
+# 创建 tinc-up 脚本
 #ip route add $NETWORK_ADDR dev \$INTERFACE
 cat > "$TINC_DIR/tinc-up" << EOF
 #!/bin/sh
@@ -88,7 +90,7 @@ ip link set \$INTERFACE up
 ip addr add $NETWORK_ADDR dev \$INTERFACE
 EOF
 
-# 创建tinc-down脚本
+# 创建 tinc-down 脚本
 #ip route del $NETWORK_ADDR dev \$INTERFACE
 cat > "$TINC_DIR/tinc-down" << EOF
 #!/bin/sh
@@ -96,12 +98,18 @@ ip addr del $NETWORK_ADDR dev \$INTERFACE
 ip link set \$INTERFACE down
 EOF
 
+# 创建 ping-test.sh 测试脚本
+cat > "$TINC_DIR/ping-test.sh" << EOF
+#!/bin/sh
+ping 10.0.0.1
+EOF
+
 # 设置执行权限
 chmod +x "$TINC_DIR"/tinc-*
+chmod +x "$TINC_DIR"/ping-test.sh
 
 # 创建其他主机配置文件
 cat > "$TINC_HOSTS_DIR/demo1" << EOF
-Subnet = 10.0.0.0/16
 Address = 1.1.1.1
 Port = 10000
 
