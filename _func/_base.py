@@ -11,7 +11,7 @@
 # 在Windows下的路径 C:\Users\<你的用户名>\AppData\Local\Temp\remote_<URL哈希值>_<天数>.py
 
 # import urllib.request, tempfile, os, time, hashlib
-# url = "https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/dev_tmp/_func/_base.py"
+# url = "https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/master/_func/_base.py"
 # cache = f"{tempfile.gettempdir()}/remote_script_{hashlib.md5(url.encode()).hexdigest()}_{int(time.time()//86400)}.py"
 # not os.path.exists(cache) and urllib.request.urlretrieve(url, cache); exec(open(cache, encoding='utf-8').read())
 

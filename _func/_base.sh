@@ -13,7 +13,7 @@
 #{ REMOTE_SCRIPT="https://示例URL/test.sh"; temp_file=$(mktemp) && curl -Ls "$REMOTE_SCRIPT" > "$temp_file" && source "$temp_file"; rm -f "$temp_file"; }
 
 # 引入公共脚本（ curl -Ls 可以替换为 wget -qO- ）
-#_D="/tmp/remote-func2512"; _F="$_D/_base.sh_$(date +%Y%m%d)"; _R="https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/dev_tmp/_func/_base.sh";
+#_D="/tmp/remote-func2512"; _F="$_D/_base.sh_$(date +%Y%m%d)"; _R="https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/master/_func/_base.sh";
 #mkdir -p "$_D" && { [ ! -f "$_F" ] && curl -Ls "$_R" > "$_F" || true; } && source "$_F"; find "$_D" -name "_base.sh_*" -mtime +1 -delete 2>/dev/null &
 
 
