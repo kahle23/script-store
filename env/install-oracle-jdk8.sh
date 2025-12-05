@@ -5,9 +5,12 @@
 # [用法]：./install-oracle-jdk8.sh
 # ==================================================
 
+# 启用严格模式：遇错停止、未定义变量报错、管道中任一命令失败则整个管道失败
+set -euo pipefail;
+# 引入公共脚本（ curl -Ls 可以替换为 wget -qO- ）
+_D="/tmp/remote-func2512"; _F="$_D/_base.sh_$(date +%Y%m%d)"; _R="https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/dev_tmp/_func/_base.sh";
+mkdir -p "$_D" && { [ ! -f "$_F" ] && curl -Ls "$_R" > "$_F" || true; } && source "$_F"; find "$_D" -name "_base.sh_*" -mtime +1 -delete 2>/dev/null &
 
-# 遇到错误立即退出
-set -e
 
 # 定义变量
 JDK_DOWNLOAD_URL="https://download.oracle.com/otn/java/jdk/8u201-b09/42970487e3af4f5aa5bca3f542482c60/jdk-8u201-linux-x64.tar.gz"
