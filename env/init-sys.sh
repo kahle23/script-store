@@ -58,6 +58,21 @@ set_timezone() {
 }
 
 
+# 同步时间
+sync_time() {
+    # 接收参数：true 或 false
+    local action="$1"
+    if [[ "$action" == "true" ]]; then
+        log_info "开始时间同步..."
+        load_remote_script "https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/master/_func/sys/time.sh"
+        configure_and_sync_ntp
+        sync_to_hardware_clock
+    else
+        log_warn "将跳过时间同步！"
+    fi
+}
+
+
 # 安装软件包
 install_packages() {
     local mth_desc="安装软件包"; log_method_start "$mth_desc";
@@ -192,10 +207,11 @@ usage() {
     echo "  --firewall ACTION    对防火墙执行 ACTION (enable 或 disable)"
     echo "  --packages LIST      指定要安装的附加软件包组，用逗号分隔"
     echo "                       可用包组: ${!PACKAGE_GROUPS[*]}"
+    echo "  --synctime whether   是否同步时间(true 或 false，默认 false)"
     echo "  -h, --help           显示此帮助信息"
     echo ""
     echo "示例:"
-    echo "  $SCRIPT_FILE_NAME --hostname my-server --firewall disable"
+    echo "  $SCRIPT_FILE_NAME --hostname my-server --firewall disable --synctime true"
     echo "    # 设置主机名，关闭防火墙，仅安装基础包(base)，同步时间"
     echo "  $SCRIPT_FILE_NAME --packages dev"
     echo "    # 不设置主机名，默认防火墙配置，安装基础包和开发工具"
@@ -211,6 +227,7 @@ main() {
     local hostname=""
     local packages_arg=""
     local firewall_action=""
+    local synctime_whether=""
 
     # 解析命令行参数
     while [[ $# -gt 0 ]]; do
@@ -225,6 +242,10 @@ main() {
                 ;;
             --packages)
                 packages_arg="$2"
+                shift 2
+                ;;
+            --synctime)
+                synctime_whether="$2"
                 shift 2
                 ;;
             -h|--help)
@@ -244,6 +265,7 @@ main() {
     # 执行各项任务
     set_hostname "$hostname"
     set_timezone
+    sync_time "$synctime_whether"
     install_packages "$packages_arg"
     create_directories
 
