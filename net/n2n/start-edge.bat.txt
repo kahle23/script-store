@@ -1,0 +1,7 @@
+@echo off
+REM 切换到批处理文件所在目录
+cd /d "%~dp0"
+
+REM 启动当前目录下的edge程序并传递参数
+start edge.exe -l demo.sss.com:29527 -v -c demo -k 1ssdsdE
+
