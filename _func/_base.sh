@@ -13,13 +13,12 @@
 #{ REMOTE_SCRIPT="https://示例URL/test.sh"; temp_file=$(mktemp) && curl -Ls "$REMOTE_SCRIPT" > "$temp_file" && source "$temp_file"; rm -f "$temp_file"; }
 
 # 引入公共脚本（ curl -Ls 可以替换为 wget -qO- ）
-#_D="/tmp/remote-func2512"; _F="$_D/_base.sh_$(date +%Y%m%d)"; _R="https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/dev_tmp/_func/_base.sh";
+#_D="/tmp/remote-func2512"; _F="$_D/_base.sh_$(date +%Y%m%d)"; _R="https://ghfast.top/https://raw.githubusercontent.com/kahle23/script-store/refs/heads/master/_func/_base.sh";
 #mkdir -p "$_D" && { [ ! -f "$_F" ] && curl -Ls "$_R" > "$_F" || true; } && source "$_F"; find "$_D" -name "_base.sh_*" -mtime +1 -delete 2>/dev/null &
 
 
 # 脚本文件名称
 readonly SCRIPT_FILE_NAME="$(basename "$0")";
-
 # 日志颜色
 readonly LOG_COLOR_NO='\033[0m';
 readonly LOG_COLOR_RED='\033[0;31m';
@@ -50,19 +49,58 @@ _log() {
         echo -e "${log_message}"
     fi
 }
-# 常用日志函数
+
+# 常用日志方法
 log_info()  { _log "INFO " "${LOG_COLOR_GREEN}"   0 "$@"; }
+log_info1() { _log "INFO " "${LOG_COLOR_BLUE}"    0 "$@"; }
 log_warn()  { _log "WARN " "${LOG_COLOR_YELLOW}"  0 "$@"; }
 log_error() { _log "ERROR" "${LOG_COLOR_RED}"     1 "$@"; }
-log_usage() { _log "USAGE" "${LOG_COLOR_BLUE}"    0 "$@"; }
+
+
+# 方法开始、结束日志方法
+# 示例：
+#local mth_desc="方法描述"; log_method_start "$mth_desc";
+#log_method_end "$mth_desc";
+log_method_start() {
+    log_info1 ">>>>>>>>>>>>>>>> [start] >>>>>>>>>>>>>>>>";
+    log_info1 ">>>>[  $1  ]<<<<";
+}
+log_method_end() {
+    log_info1 "<<<<<<<<<<<<<<<< [ end ] <<<<<<<<<<<<<<<<\n";
+}
+
+
+# 检查root权限
+# 示例：
+#if ! check_root; then
+#    exit 1
+#fi
+check_root() {
+    # 使用 id -u 最安全
+    if [ "$(id -u 2>/dev/null)" != "0" ]; then
+        # 如果 id 命令不可用，尝试其他方法
+        if [ -n "$EUID" ] && [ "$EUID" -eq 0 ]; then
+            return 0
+        fi
+        # 如果 $EUID 不存在，尝试 whoami
+        if [ "$(whoami 2>/dev/null)" = "root" ]; then
+            return 0
+        fi
+        # 错误提示
+        log_error "错误: 需要root权限" >&2
+        log_error "请使用: sudo $0 $*" >&2
+        return 1
+    fi
+    return 0
+}
 
 
 # 下载并执行远程脚本的通用函数
 # 参数1: 远程脚本URL
 # 参数2: 本地缓存目录（可选，默认/tmp/remote-func2512）
 # 参数3: 缓存天数（可选，默认1天）
-# >> 示例[基本用法]：load_remote_script "远程脚本的URL"
-# >> 示例[指定缓存目录和缓存天数]：load_remote_script "远程脚本的URL" "/tmp/myscripts" 3
+# 示例[基本用法]：load_remote_script "远程脚本的URL"
+# 示例[指定缓存目录和缓存天数]：load_remote_script "远程脚本的URL" "/tmp/myscripts" 3
 load_remote_script() {
     local remote_script_url="$1"
     local cache_dir="${2:-/tmp/remote-func2512}"
