@@ -4,6 +4,7 @@
 # Bug侠-N2N：https://bugxia.com/category/n2n_net
 #
 # 身份认证：https://github.com/ntop/n2n/blob/3.0-stable/doc/Authentication.md
+# 超级节点联盟：https://github.com/ntop/n2n/blob/3.0-stable/doc/Federation.md
 # 【注意：要放开UDP协议，有些VPS的防火墙，区分TCP和UDP的，对应端口的TCP和UDP都要放开。】
 # 【注意：community.list用户密码是有问题的，配置了之后，supernode怎么样都接收不到edge的请求了】
 
@@ -117,16 +118,16 @@ cat > "$N2N_DIR/supernode.sh" << EOF
 # -f                 # 前台运行（systemd 管理时需要加上 -f）
 # -v                 # 输出更多日志
 # -M                 # 连接断开重连不报错 | 关闭非用户名密码认证的群组的MAC和IP地址欺骗保护功能
+# -l                 # 主机:端口 | 和 -F 配合，已知的一台Supernode地址和端口
+# -F                 # federation名称 | supernode 联盟名称，默认为 *Federation （把这个名称也当成一种密码）
 
 # -V                 # 文本 | 自定义字符串（最长19位），用于在管理输出日志中展示
-# -F                 # federation名称 | supernode 联盟名称，默认为 *Federation
-# -l                 # 主机:端口 | 和 -F 配合，已知的一台Supernode地址和端口
 # -t                 # 管理端口 | 用于管理supernode
 # --management_password  # 文本 | 管理端的密码
 
 
 # 主命令
-$N2N_BIN_DIR/supernode -p 49527 -a 10.1.0.0-10.1.0.0/16 -M -f -v -c $N2N_DIR/community.list
+$N2N_BIN_DIR/supernode -p 49527 -a 10.1.0.0-10.1.0.0/16 -M -f -v -c $N2N_DIR/community.list -l n2n-2.demo.com:49527 -F DemoFederationPwd
 
 EOF
 # 授权
@@ -136,10 +137,10 @@ chmod +x "$N2N_DIR/supernode.sh"
 # 创建 community.list
 echo "创建 community.list ..."
 cat > "$N2N_DIR/community.list" << EOF
-# 允许连接到supernode的组名称列表
+# 允许连接到supernode的组名称列表（这个组名称相当于是密码）
 # 同时也支持正则形式的小组名称，例如name00~name19，可以这么表述
-demo1
-demo2
+demo1Pwd
+demo2Pwd
 
 EOF
 
@@ -149,17 +150,17 @@ echo "创建 edge.sh ..."
 cat > "$N2N_DIR/edge.sh" << EOF
 #!/bin/bash
 # -l                 # 服务端（supernode）:端口 | N2N的服务端（中心节点）
-# -c                 # 组名称 | 用于区分虚拟局域网
+# -c                 # 组名称 | 用于区分虚拟局域网（这个组名称相当于是密码）
 # -k                 # 密钥 | 用于虚拟局域网内传输的数据加密，留空则不加密
 # -f                 # 前台运行（systemd 管理时需要加上 -f）
 # -d                 # tun网卡名称 | 指定本机的N2N网卡，如果本机存在多个Tap网卡，可以使用此参数自定义，或留空使程序自动搜寻
 
 # -a                 # 获取IP的模式 | 如需自定义虚拟IP，使用 -a IP地址 来自定义虚拟IP，如需自动获取（需服务端支持），留空即可
 # -H                 # 数据包报头完整加密
-# -P                 # 密钥 | 多个supernode组成联盟时，需要填入该参数以便认证
+# -P                 # 密钥 | 多个supernode组成联盟时，需要填入该参数以便认证（联盟并没有密钥设置）
 
 # 主命令
-$N2N_BIN_DIR/edge -l n2n.demo.com:49527 -c demo1 -k "demokey" -f
+$N2N_BIN_DIR/edge -l n2n-1.demo.com:49527 -l n2n-2.demo.com:49527 -c demo1Pwd -k "demokeyPwd" -f
 
 EOF
 # 授权
